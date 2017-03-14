@@ -4,7 +4,7 @@
 # Author: Alexander Demura
 # Tested with Python 2.7.13, 3.5.3 and 3.6.0
 
-import random
+from random import randint
 
 
 # Class for fuel prices
@@ -20,10 +20,10 @@ class Car(object):
 
     # Car initialization with all necessary params
     def __init__(self):
-        self.name = "Car " + str(len(self.all_cars) + 1)
+        self.name = "Car #" + str(len(self.all_cars) + 1)
 
         # Engine type selection by condition
-        if not (len(self.all_cars)+1) % 3:
+        if not (len(self.all_cars) + 1) % 3:
             self.engine_type = "diesel"
             self.fuel_consumption = 0.06
             self.fuel_price = Fuel.diesel_price
@@ -41,7 +41,7 @@ class Car(object):
             self.mileage_to_utilization = 1200000
 
         # Gas tank volume selection by condition
-        if not (len(self.all_cars)+1) % 5:
+        if not (len(self.all_cars) + 1) % 5:
             self.gas_tank_volume = 75.0
         else:
             self.gas_tank_volume = 60.0
@@ -49,7 +49,7 @@ class Car(object):
         self.price = 10000.0
         self.__mileage = 0
         # Random route for every car
-        self.route = random.randint(56000, 286000)
+        self.route = randint(56000, 286000)
         self.route_price = 0
         self.number_of_fueling = 0
         # Initial value of fuel level (full tank for example)
@@ -70,15 +70,14 @@ class Car(object):
                 self.route_price += self.gas_tank_volume * self.fuel_price
                 self.current_fuel_volume = self.gas_tank_volume
                 self.number_of_fueling += 1
-            # Change parameters (residual value and fuel consumption) after every 1000 km
+            # Change parameters (residual value and fuel consumption) after
+            # every 1000 km
             if not self.__mileage % 1000:
                 self.price = round(self.price - self.depreciation, 2)
                 self.fuel_consumption *= 1.01
             # Add overhaul price to route price
             if not self.__mileage % self.mileage_to_overhaul:
                 self.route_price += self.overhaul_price
-        # test information
-        # print(self.name, self.__mileage, self.current_fuel_volume, self.route_price, self.price, self.fuel_consumption)
 
     # Methods for car state
 
@@ -100,6 +99,8 @@ class Car(object):
 
 # Class with final info
 class Info:
+
+    # Method for sorting list of cars by conditions
     def sorter(self, list_of_cars):
         list_of_diesel_cars = []
         list_of_gasoline_cars = []
@@ -111,14 +112,16 @@ class Info:
                 list_of_diesel_cars.append(car)
             elif car.engine_type == "gasoline":
                 list_of_gasoline_cars.append(car)
-        list_of_diesel_cars = sorted(list_of_diesel_cars, key=lambda car: car.price)
-        list_of_gasoline_cars = sorted(list_of_gasoline_cars, key=lambda car: car.route_to_utilization())
+        list_of_diesel_cars = sorted(
+            list_of_diesel_cars, key=lambda car: car.price)
+        list_of_gasoline_cars = sorted(
+            list_of_gasoline_cars, key=lambda car: car.route_to_utilization())
 
         for car in list_of_diesel_cars:
-            list_of_dies_names.append("{}: {}".format(car.name, car.route_to_utilization()))
+            list_of_dies_names.append("{}: {}".format(
+                car.name, car.route_to_utilization()))
         for car in list_of_gasoline_cars:
             list_of_gas_names.append("{}: {}".format(car.name, car.price))
-
 
         return list_of_dies_names, list_of_gas_names
 
