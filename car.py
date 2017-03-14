@@ -74,22 +74,34 @@ class Car(object):
     def route_to_utilization(self):
         return self.mileage_to_utilization - self.__mileage
 
-class Info():
-    def sorter(list_of_cars):
+
+class Info:
+    def sorter(self, list_of_cars):
         list_of_diesel_cars = []
         list_of_gasoline_cars = []
+        list_of_dies_names = []
+        list_of_gas_names = []
+
         for car in list_of_cars:
             if car.engine_type == "diesel":
                 list_of_diesel_cars.append(car)
             elif car.engine_type == "gasoline":
                 list_of_gasoline_cars.append(car)
-        return list_of_gasoline_cars, list_of_diesel_cars
+        list_of_diesel_cars = sorted(list_of_diesel_cars, key=lambda car: car.price)
+        list_of_gasoline_cars = sorted(list_of_gasoline_cars, key=lambda car: car.route_to_utilization())
+        for car in list_of_gasoline_cars:
+            list_of_gas_names.append("{}: {}".format(car.name, car.price))
+        for car in list_of_diesel_cars:
+            list_of_dies_names.append("{}: {}".format(car.name, car.route_to_utilization()))
 
-    def full_price(list_of_cars):
+        return list_of_dies_names, list_of_gas_names
+
+    def full_price(self, list_of_cars):
         price = 0.0
         for car in list_of_cars:
             price += car.price
         return price
+
 
 tank_volume = float
 eng_type = str
@@ -103,5 +115,5 @@ for car in Car.all_cars:
           format(car.name, car.engine_type, car.gas_tank_volume, car.price, car.fuel_consumption, car.route))
     car.run()
 
-print(Info.sorter(Car.all_cars))
-print(Info.full_price(Car.all_cars))
+print(Info.sorter(None, Car.all_cars))
+print(Info.full_price(None, Car.all_cars))
