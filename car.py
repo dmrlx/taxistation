@@ -128,7 +128,7 @@ class Car(object):
         return self.mileage_to_utilization - self.__mileage
 
 # cars generator
-for i in range(5):
+for i in range(100):
     Car()
 # Info about every car and runing to route
 for car in Car.all_cars:
