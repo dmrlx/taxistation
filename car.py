@@ -13,37 +13,7 @@ class Fuel:
     diesel_price = 2.4
 
 
-# Class with final info
-class Info:
-    def sorter(self, list_of_cars):
-        list_of_diesel_cars = []
-        list_of_gasoline_cars = []
-        list_of_dies_names = []
-        list_of_gas_names = []
-
-        for car in list_of_cars:
-            if car.engine_type == "diesel":
-                list_of_diesel_cars.append(car)
-            elif car.engine_type == "gasoline":
-                list_of_gasoline_cars.append(car)
-        list_of_diesel_cars = sorted(list_of_diesel_cars, key=lambda car: car.price)
-        list_of_gasoline_cars = sorted(list_of_gasoline_cars, key=lambda car: car.route_to_utilization())
-
-        for car in list_of_diesel_cars:
-            list_of_dies_names.append("{}: {}".format(car.name, car.route_to_utilization()))
-        for car in list_of_gasoline_cars:
-            list_of_gas_names.append("{}: {}".format(car.name, car.price))
-
-
-        return list_of_dies_names, list_of_gas_names
-
-    def full_price(self, list_of_cars):
-        price = 0.0
-        for car in list_of_cars:
-            price += car.price
-        return price
-
-
+# Main class for generate "cars"
 class Car(object):
     # List for all initialized objects
     all_cars = []
@@ -126,6 +96,38 @@ class Car(object):
 
     def route_to_utilization(self):
         return self.mileage_to_utilization - self.__mileage
+
+
+# Class with final info
+class Info:
+    def sorter(self, list_of_cars):
+        list_of_diesel_cars = []
+        list_of_gasoline_cars = []
+        list_of_dies_names = []
+        list_of_gas_names = []
+
+        for car in list_of_cars:
+            if car.engine_type == "diesel":
+                list_of_diesel_cars.append(car)
+            elif car.engine_type == "gasoline":
+                list_of_gasoline_cars.append(car)
+        list_of_diesel_cars = sorted(list_of_diesel_cars, key=lambda car: car.price)
+        list_of_gasoline_cars = sorted(list_of_gasoline_cars, key=lambda car: car.route_to_utilization())
+
+        for car in list_of_diesel_cars:
+            list_of_dies_names.append("{}: {}".format(car.name, car.route_to_utilization()))
+        for car in list_of_gasoline_cars:
+            list_of_gas_names.append("{}: {}".format(car.name, car.price))
+
+
+        return list_of_dies_names, list_of_gas_names
+
+    def full_price(self, list_of_cars):
+        price = 0.0
+        for car in list_of_cars:
+            price += car.price
+        return price
+
 
 # cars generator
 for i in range(100):
