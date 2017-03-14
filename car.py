@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+
+# Task: Taxi station
+# Author: Alexander Demura
+# Tested with Python 2.7.13, 3.5.3 and 3.6.0
+
 import random
 
 
@@ -122,7 +128,7 @@ class Car(object):
         return self.mileage_to_utilization - self.__mileage
 
 # cars generator
-for i in range(100):
+for i in range(5):
     Car()
 # Info about every car and runing to route
 for car in Car.all_cars:
@@ -132,5 +138,6 @@ for car in Car.all_cars:
     car.run()
 
 # Output final info
-print(Info.sorter(None, Car.all_cars))
-print(Info.full_price(None, Car.all_cars))
+informer = Info()
+print(informer.sorter(Car.all_cars))
+print(informer.full_price(Car.all_cars))
