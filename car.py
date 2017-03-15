@@ -39,6 +39,7 @@ class Car(object):
             self.overhaul_price = 500.0
 
         # Gas tank volume selection by condition
+        self.fuel_consumption_delta = self.fuel_consumption * 0.01
         if not (len(self.all_cars) + 1) % 5:
             self.gas_tank_volume = 75.0
         else:
@@ -75,7 +76,8 @@ class Car(object):
             # every 1000 km
             if not self.__mileage % 1000:
                 self.price = round(self.price - self.depreciation, 2)
-                self.fuel_consumption *= 1.01
+                self.fuel_consumption += self.fuel_consumption_delta
+                print(self.fuel_consumption)
             # Add overhaul price to route price
             if not self.__mileage % self.mileage_to_overhaul:
                 self.route_price += self.overhaul_price
@@ -146,7 +148,7 @@ class Info:
 
 
 # cars generator
-for i in range(100):
+for i in range(1):
     Car()
 # Info about every car and runing to route
 for car in Car.all_cars:
