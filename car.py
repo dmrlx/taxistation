@@ -28,17 +28,15 @@ class Car(object):
             self.fuel_consumption = 0.06
             self.fuel_price = Fuel.diesel_price
             self.depreciation = 10.5
-            self.mileage_to_overhaul = 150000
+            self.mileage_to_overhaul = 150000.0
             self.overhaul_price = 700
-            self.mileage_to_utilization = 1000000
         else:
             self.engine_type = "gasoline"
             self.fuel_consumption = 0.08
             self.fuel_price = Fuel.gasoline_price
             self.depreciation = 9.5
-            self.mileage_to_overhaul = 100000
-            self.overhaul_price = 500
-            self.mileage_to_utilization = 1200000
+            self.mileage_to_overhaul = 100000.0
+            self.overhaul_price = 500.0
 
         # Gas tank volume selection by condition
         if not (len(self.all_cars) + 1) % 5:
@@ -47,6 +45,8 @@ class Car(object):
             self.gas_tank_volume = 60.0
 
         self.price = 10000.0
+        # Divisor - average price of 1 km of run.
+        self.mileage_to_utilization = self.price / (self.depreciation / 1000.0 + self.overhaul_price / self.mileage_to_overhaul)
         self.__mileage = 0
         # Random route for every car
         self.route = randint(56000, 286000)
@@ -137,8 +137,8 @@ for i in range(100):
     Car()
 # Info about every car and runing to route
 for car in Car.all_cars:
-    print("Name: {}; engine type: {}; tank volume: {}; price: {}; fuel consumption: {}; route: {}".
-          format(car.name, car.engine_type, car.gas_tank_volume, car.price, car.fuel_consumption, car.route))
+    print("Name: {}; engine type: {}; tank volume: {}; price: {}; fuel consumption: {}; route: {}; mileage to utilization: {}.".
+          format(car.name, car.engine_type, car.gas_tank_volume, car.price, car.fuel_consumption, car.route, car.mileage_to_utilization))
 
     car.run()
 
