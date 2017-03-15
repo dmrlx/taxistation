@@ -158,5 +158,7 @@ for car in Car.all_cars:
 
 # Output final info
 informer = Info()
-print(informer.sorter(Car.all_cars))
-print(informer.full_price(Car.all_cars))
+lists = informer.sorter(Car.all_cars)
+print("List of diesel cars: {}".format(lists[0]))
+print("List of gasiline cars: {}".format(lists[1]))
+print("Price of all cars: {}".format(informer.full_price(Car.all_cars)))
