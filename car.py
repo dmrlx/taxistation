@@ -28,14 +28,14 @@ class Car(object):
             self.fuel_consumption = 0.06
             self.fuel_price = Fuel.diesel_price
             self.depreciation = 10.5
-            self.mileage_to_overhaul = 150000.0
+            self.mileage_to_overhaul = 150000
             self.overhaul_price = 700
         else:
             self.engine_type = "gasoline"
             self.fuel_consumption = 0.08
             self.fuel_price = Fuel.gasoline_price
             self.depreciation = 9.5
-            self.mileage_to_overhaul = 100000.0
+            self.mileage_to_overhaul = 100000
             self.overhaul_price = 500.0
 
         # Gas tank volume selection by condition
@@ -46,7 +46,8 @@ class Car(object):
 
         self.price = 10000.0
         # Divisor - average price of 1 km of run.
-        self.mileage_to_utilization = self.price / (self.depreciation / 1000.0 + self.overhaul_price / self.mileage_to_overhaul)
+        #self.mileage_to_util = self.price / (self.depreciation / 1000.0 + self.overhaul_price / self.mileage_to_overhaul)
+        self.mileage_to_util = self.mileage_to_utilisation()
         self.__mileage = 0
         # Random route for every car
         self.route = randint(56000, 286000)
@@ -81,6 +82,18 @@ class Car(object):
 
     # Methods for car state
 
+    def mileage_to_utilisation(self):
+        mileage = 0
+        price = self.price
+        while price > 0:
+            mileage += 1000
+            if not mileage % 1000:
+                price -= self.depreciation
+            if not mileage % self.mileage_to_overhaul:
+                price -= self.overhaul_price
+        return mileage
+
+
     def mileage(self):
         return self.__mileage
 
@@ -94,7 +107,7 @@ class Car(object):
         return self.number_of_fueling * (self.fuel_price * self.gas_tank_volume)
 
     def route_to_utilization(self):
-        return self.mileage_to_utilization - self.__mileage
+        return self.mileage_to_util - self.__mileage
 
 
 # Class with final info
@@ -138,7 +151,7 @@ for i in range(100):
 # Info about every car and runing to route
 for car in Car.all_cars:
     print("Name: {}; engine type: {}; tank volume: {}; price: {}; fuel consumption: {}; route: {}; mileage to utilization: {}.".
-          format(car.name, car.engine_type, car.gas_tank_volume, car.price, car.fuel_consumption, car.route, car.mileage_to_utilization))
+          format(car.name, car.engine_type, car.gas_tank_volume, car.price, car.fuel_consumption, car.route, car.mileage_to_util))
 
     car.run()
 
