@@ -81,8 +81,7 @@ class Car(object):
             if not self.__mileage % self.mileage_to_overhaul:
                 self.route_price += self.overhaul_price
 
-    # Methods for car state
-
+# Receiving of value mileage to utilisation
     def mileage_to_utilisation(self):
         mileage = 0
         price = self.price
@@ -94,7 +93,7 @@ class Car(object):
                 price -= self.overhaul_price
         return mileage
 
-
+    # Methods for car state
     def mileage(self):
         return self.__mileage
 
