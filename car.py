@@ -77,7 +77,6 @@ class Car(object):
             if not self.__mileage % 1000:
                 self.price = round(self.price - self.depreciation, 2)
                 self.fuel_consumption += self.fuel_consumption_delta
-                print(self.fuel_consumption)
             # Add overhaul price to route price
             if not self.__mileage % self.mileage_to_overhaul:
                 self.route_price += self.overhaul_price
@@ -148,7 +147,7 @@ class Info:
 
 
 # cars generator
-for i in range(1):
+for i in range(100):
     Car()
 # Info about every car and runing to route
 for car in Car.all_cars:
