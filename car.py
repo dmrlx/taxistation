@@ -244,7 +244,7 @@ class Info:
         return sum_of_credits
 
 # Cars generator
-for i in range(1, 2):
+for i in range(1, 101):
     if not i % 3 and not i % 5:
         Car("diesel", 75.0)
     elif not i % 3:
@@ -256,7 +256,7 @@ for i in range(1, 2):
 
 # info generator and starter of route
 for car in Car.all_cars:
-    logger.info("Start status: Car: {}, engine: {}, tank volume: {}, route: {} км, price: {}, spending on fuel: {}, "
+    logger.info("Start status: Car: {}, engine: {}, tank volume: {}, route: {} km, price: {}, spending on fuel: {}, "
                 "number of fuelling: {}, engine condition: {}%."
                 .format(car.name, car.engine.engine_number, car.gas_tank_volume, car.route, car.price,
                         car.sum_fuel_price, car.number_of_refuelling, round(car.engine.engine_condition, 2)))
@@ -264,7 +264,7 @@ for car in Car.all_cars:
     car.run()
 
     logger.info(
-        "Start status: Car: {}, engine: {}, tank volume: {}, route: {} км, price: {}, spending on fuel: {}, "
+        "Start status: Car: {}, engine: {}, tank volume: {}, route: {} km, price: {}, spending on fuel: {}, "
         "number of fuelling: {}, engine condition: {}%."
         .format(car.name, car.engine.engine_number, car.gas_tank_volume, car.route, car.price, car.sum_fuel_price,
                 car.number_of_refuelling, round(car.engine.engine_condition, 2)))
