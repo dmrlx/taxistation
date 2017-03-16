@@ -2,15 +2,38 @@
 
 # Task: Taxi station
 # Author: Alexander Demura
-# Tested with Python 2.7.13, 3.5.3 and 3.6.0
+# Tested with Python 2.7.13 and 3.6.0
 
+import sys
+import logging
 from random import randint
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+logger.addHandler(logging.StreamHandler(sys.stdout))
+logger.addHandler(logging.FileHandler("car_report.log"))
+
+
+# Class for main constants
+class Constants:
+    DIESEL_MILEAGE_TO_OVERHAUL = 150000
+    DIESEL_OVERHAUL_PRICE = 700.0
+    DIESEL_DEPRECIATION = 10.5
+
+    GASOLINE_MILEAGE_TO_OVERHAUL = 100000
+    GASOLINE_OVERHAUL_PRICE = 500.0
+    GASOLINE_DEPRECIATION = 9.5
+
+    START_PRICE = 10000.0
+
+    ENGINE_REPLACING_COST = 3000.0
 
 
 # Class for fuel prices
-class Fuel:
-    gasoline_price = 1.8
-    diesel_price = 2.4
+class FuelPrices:
+    AI_92 = 2.2
+    AI_95 = 2.5
+    DIESEL = 2.4
 
 
 # Main class for generate "cars"
@@ -19,69 +42,75 @@ class Car(object):
     all_cars = []
 
     # Car initialization with all necessary params
-    def __init__(self):
-        self.name = "Car #" + str(len(self.all_cars) + 1)
+    def __init__(self, engine_type, gas_tank_volume):
+        self.name = "car_" + str(len(self.all_cars) + 1)
+        self.engine_type = engine_type
+        self.engine = Engine(engine_type, is_on_car=self)
+        self.gas_tank_volume = gas_tank_volume
 
-        # Engine type selection by condition
-        if not (len(self.all_cars) + 1) % 3:
-            self.engine_type = "diesel"
-            self.fuel_consumption = 0.06
-            self.fuel_price = Fuel.diesel_price
-            self.depreciation = 10.5
-            self.mileage_to_overhaul = 150000
-            self.overhaul_price = 700
+        if self.engine.fuel_type == "diesel":
+            self.mileage_to_overhaul = Constants.DIESEL_MILEAGE_TO_OVERHAUL
+            self.overhaul_price = Constants.DIESEL_OVERHAUL_PRICE
+            self.depreciation = Constants.DIESEL_DEPRECIATION
         else:
-            self.engine_type = "gasoline"
-            self.fuel_consumption = 0.08
-            self.fuel_price = Fuel.gasoline_price
-            self.depreciation = 9.5
-            self.mileage_to_overhaul = 100000
-            self.overhaul_price = 500.0
+            self.mileage_to_overhaul = Constants.GASOLINE_MILEAGE_TO_OVERHAUL
+            self.overhaul_price = Constants.GASOLINE_OVERHAUL_PRICE
+            self.depreciation = Constants.GASOLINE_DEPRECIATION
 
-        # Gas tank volume selection by condition
-        self.fuel_consumption_delta = self.fuel_consumption * 0.01
-        if not (len(self.all_cars) + 1) % 5:
-            self.gas_tank_volume = 75.0
-        else:
-            self.gas_tank_volume = 60.0
+        self.price = Constants.START_PRICE
 
-        self.price = 10000.0
-        # Divisor - average price of 1 km of run.
-        #self.mileage_to_util = self.price / (self.depreciation / 1000.0 + self.overhaul_price / self.mileage_to_overhaul)
-        self.mileage_to_util = self.mileage_to_utilisation()
         self.__mileage = 0
         # Random route for every car
-        self.route = randint(56000, 286000)
+        self.route = randint(600000, 950000)
         self.route_price = 0
+        self.sum_fuel_price = 0
         self.number_of_fueling = 0
-        # Initial value of fuel level (full tank for example)
-        self.current_fuel_volume = self.gas_tank_volume
+        self.fuelings = 0
+        # Начальное количество топлива
+        self.current_fuel_level = self.gas_tank_volume
 
         self.all_cars.append(self)
+
+    # Replacing of engine
+    def remotor(self):
+        old_engine_number = self.engine.engine_number
+        # "Utilisation" of old engine
+        Engine.reclaimed_engines.append(self.engine)
+        del self.engine
+        self.engine = Engine(self.engine_type, is_on_car=self)
+        self.price -= self.engine.price
+        new_engine_number = self.engine.engine_number
+        logger.info("Engine {} replaced with {}".format(
+            old_engine_number, new_engine_number))
 
     # The method for "traveling"
     def run(self):
         # Actions for every km in route
         for km in range(self.route):
             # Increase mileage for 1 km
+
             self.__mileage += 1
+            self.engine.mileage += 1
+
+            if self.engine.engine_condition <= 0:
+                self.remotor()
+
             # Decrease fuel level for size of fuel consumption
-            self.current_fuel_volume -= self.fuel_consumption
+            self.current_fuel_level -= self.engine.fuel_consumption
+
             # Check for sufficient fuel for the next step
-            if self.current_fuel_volume < self.fuel_consumption:
-                self.route_price += self.gas_tank_volume * self.fuel_price
-                self.current_fuel_volume = self.gas_tank_volume
-                self.number_of_fueling += 1
+            if self.current_fuel_level < self.engine.fuel_consumption:
+                self.fueling()
+
             # Change parameters (residual value and fuel consumption) after
             # every 1000 km
             if not self.__mileage % 1000:
-                self.price = round(self.price - self.depreciation, 2)
-                self.fuel_consumption += self.fuel_consumption_delta
+                self.price -= self.depreciation
             # Add overhaul price to route price
             if not self.__mileage % self.mileage_to_overhaul:
                 self.route_price += self.overhaul_price
 
-# Receiving of value mileage to utilisation
+    # Receiving of value mileage to utilisation
     def mileage_to_utilisation(self):
         mileage = 0
         price = self.price
@@ -93,21 +122,67 @@ class Car(object):
                 price -= self.overhaul_price
         return mileage
 
-    # Methods for car state
-    def mileage(self):
+    def fueling(self):
+        self.route_price += self.gas_tank_volume * self.engine.current_fuel_price
+        self.sum_fuel_price += self.gas_tank_volume * self.engine.current_fuel_price
+        self.current_fuel_level = self.gas_tank_volume
+        self.fuelings += 1
+
+    @property
+    def current_route(self):
         return self.__mileage
 
-    def residual_value(self):
-        return self.price
+    @property
+    def spending_on_fuel(self):
+        return self.sum_fuel_price
 
-    def fuelings(self):
-        return self.number_of_fueling
+    @property
+    def number_of_fuelings(self):
+        return self.fuelings
 
-    def fuel_price_for_route(self):
-        return self.number_of_fueling * (self.fuel_price * self.gas_tank_volume)
 
-    def route_to_utilization(self):
-        return self.mileage_to_util - self.__mileage
+class Engine(object):
+    # Список всех двигателей; первый подсписок — дизельные, второй — бензиновые
+    all_engines = [[], []]
+    reclaimed_engines = []
+
+    def __init__(self, fuel_type, is_on_car=None):
+        self.fuel_type = fuel_type
+        self.is_on_car = is_on_car
+        self.mileage = 0
+        self.price = Constants.ENGINE_REPLACING_COST
+
+        if fuel_type == "diesel":
+            self.engine_number = "diesel_" + str(len(self.all_engines[0]) + 1)
+            self.all_engines[0].append(self)
+            self.engine_lifetime = 650000.0
+            self.fuel_consumption = 0.06
+
+        elif fuel_type == "gasoline":
+            self.engine_number = "gasoline_" + str(len(self.all_engines[1]) + 1)
+            self.all_engines[1].append(self)
+            self.engine_lifetime = 700000.0
+            self.fuel_consumption = 0.08
+
+        self.fuel_consumption_delta = self.fuel_consumption * 0.01
+
+        if not self.mileage % 1000:
+            self.fuel_consumption += self.fuel_consumption_delta
+
+    @property
+    def current_fuel_price(self):
+        if self.fuel_type == "gasoline":
+            if self.mileage < 50000:
+                self.fuel_price = FuelPrices.AI_92
+            else:
+                self.fuel_price = FuelPrices.AI_95
+        else:
+            self.fuel_price = FuelPrices.DIESEL
+        return self.fuel_price
+
+    @property
+    def engine_condition(self):
+        return round(100 - self.mileage / self.engine_lifetime * 100, 2)
 
 
 # Class with final info
@@ -120,44 +195,70 @@ class Info:
         list_of_dies_names = []
         list_of_gas_names = []
 
-        for car in list_of_cars:
-            if car.engine_type == "diesel":
-                list_of_diesel_cars.append(car)
-            elif car.engine_type == "gasoline":
-                list_of_gasoline_cars.append(car)
+        for item in list_of_cars:
+            if item.engine_type == "diesel":
+                list_of_diesel_cars.append(item)
+            elif item.engine_type == "gasoline":
+                list_of_gasoline_cars.append(item)
+
         list_of_diesel_cars = sorted(
             list_of_diesel_cars, key=lambda car: car.price)
         list_of_gasoline_cars = sorted(
-            list_of_gasoline_cars, key=lambda car: car.route_to_utilization())
+            list_of_gasoline_cars, key=lambda car: car.price)
 
-        for car in list_of_diesel_cars:
-            list_of_dies_names.append("{}: {}".format(
-                car.name, car.route_to_utilization()))
-        for car in list_of_gasoline_cars:
-            list_of_gas_names.append("{}: {}".format(car.name, car.price))
+        for elem in list_of_diesel_cars:
+            list_of_dies_names.append("{}: {}".format(elem.name, elem.price))
+        for elem in list_of_gasoline_cars:
+            list_of_gas_names.append("{}: {}".format(elem.name, elem.price))
 
         return list_of_dies_names, list_of_gas_names
 
+    # Method for calc price of all cars
     def full_price(self, list_of_cars):
         price = 0.0
         for car in list_of_cars:
             price += car.price
         return price
 
+    # Method for calc credits
+    def credits_sum(self):
+        sum_of_credits = 0.0
+        for car in Car.all_cars:
+            if car.price < 0:
+                sum_of_credits += car.price
+        return sum_of_credits
 
-# cars generator
-for i in range(100):
-    Car()
-# Info about every car and runing to route
+
+for i in range(1, 6):
+    if not i % 3 and not i % 5:
+        Car("diesel", 75.0)
+    elif not i % 3:
+        Car("diesel", 60.0)
+    elif not i % 5:
+        Car("gasoline", 75.0)
+    else:
+        Car("gasoline", 60)
+
 for car in Car.all_cars:
-    print("Name: {}; engine type: {}; tank volume: {}; price: {}; fuel consumption: {}; route: {}; mileage to utilization: {}.".
-          format(car.name, car.engine_type, car.gas_tank_volume, car.price, car.fuel_consumption, car.route, car.mileage_to_util))
-
+    logger.info("Start status: Car: {}, engine: {}, tank volume: {}, route: {} км, price: {}, spending on fuel: {}, number of fuelings: {}, engine condition: {}%.".
+                format(car.name, car.engine.engine_number, car.gas_tank_volume, car.route, car.price, car.sum_fuel_price, car.number_of_fuelings, car.engine.engine_condition))
     car.run()
+    logger.info(
+        "Start status: Car: {}, engine: {}, tank volume: {}, route: {} км, price: {}, spending on fuel: {}, number of fuelings: {}, engine condition: {}%.".
+        format(car.name, car.engine.engine_number, car.gas_tank_volume, car.route, car.price, car.sum_fuel_price, car.number_of_fuelings, car.engine.engine_condition))
 
 # Output final info
+
 informer = Info()
+
+logger.info("Sum of credits: {}".format(informer.credits_sum()))
+logger.info("Reclaimed engines: {}".format(Engine.reclaimed_engines))
+
+for engine in Engine.reclaimed_engines:
+    logger.info("Reclaimed engine name: {}".format(engine.engine_number))
+
 lists = informer.sorter(Car.all_cars)
-print("List of diesel cars: {}".format(lists[0]))
-print("List of gasiline cars: {}".format(lists[1]))
-print("Price of all cars: {}".format(informer.full_price(Car.all_cars)))
+
+logger.info("List of diesel cars: {}".format(lists[0]))
+logger.info("List of gasiline cars: {}".format(lists[1]))
+logger.info("Price of all cars: {}".format(informer.full_price(Car.all_cars)))
