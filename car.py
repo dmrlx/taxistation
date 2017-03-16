@@ -256,14 +256,18 @@ for i in range(1, 2):
 
 # info generator and starter of route
 for car in Car.all_cars:
-    logger.info("Start status: Car: {}, engine: {}, tank volume: {}, route: {} км, price: {}, spending on fuel: {}, number of fuelling: {}, engine condition: {}%."
-                .format(car.name, car.engine.engine_number, car.gas_tank_volume, car.route, car.price, car.sum_fuel_price, car.number_of_refuelling, round(car.engine.engine_condition, 2)))
+    logger.info("Start status: Car: {}, engine: {}, tank volume: {}, route: {} км, price: {}, spending on fuel: {}, "
+                "number of fuelling: {}, engine condition: {}%."
+                .format(car.name, car.engine.engine_number, car.gas_tank_volume, car.route, car.price,
+                        car.sum_fuel_price, car.number_of_refuelling, round(car.engine.engine_condition, 2)))
 
     car.run()
 
     logger.info(
-        "Start status: Car: {}, engine: {}, tank volume: {}, route: {} км, price: {}, spending on fuel: {}, number of fuelling: {}, engine condition: {}%."
-        .format(car.name, car.engine.engine_number, car.gas_tank_volume, car.route, car.price, car.sum_fuel_price, car.number_of_refuelling, round(car.engine.engine_condition, 2)))
+        "Start status: Car: {}, engine: {}, tank volume: {}, route: {} км, price: {}, spending on fuel: {}, "
+        "number of fuelling: {}, engine condition: {}%."
+        .format(car.name, car.engine.engine_number, car.gas_tank_volume, car.route, car.price, car.sum_fuel_price,
+                car.number_of_refuelling, round(car.engine.engine_condition, 2)))
 
 # Output final info
 informer = Info()
