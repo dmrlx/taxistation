@@ -159,7 +159,6 @@ class Engine(object):
         self.mileage = 0
         self.price = Constants.ENGINE_REPLACING_COST
 
-
         if fuel_type == "diesel":
             self.engine_number = "diesel_" + str(len(self.all_engines[0]) + 1)
             self.all_engines[0].append(self)
@@ -191,7 +190,7 @@ class Engine(object):
             self.fuel_price = FuelPrices.DIESEL
         return self.fuel_price
 
-    # Calculation of engine conditions =>%
+    # Calculation of engine conditions in %
     @property
     def engine_condition(self):
         return 100 - (self.mileage/self.engine_lifetime) * 100
@@ -260,36 +259,38 @@ class Taxistation(object):
 
         print("Created \"{}\" with {} cars.".format(self.name, self.number_of_cars))
 
-minsk_taxistation = Taxistation(number_of_cars=100, index_of_diesel=3, index_of_bigger_tank=5, name="Minsk Taxistation")
+
+if __name__ == "__main__":
+
+    minsk_taxistation = Taxistation(number_of_cars=10, index_of_diesel=3, index_of_bigger_tank=5, name="Minsk Taxistation")
 
 
+    # info generator and starter of route
+    for car in Car.all_cars:
+        logger.info("Start status: Car: {}, engine: {}, tank volume: {}, route: {} km, price: {}, spending on fuel: {}, "
+                    "number of fuelling: {}, engine condition: {}%."
+                    .format(car.name, car.engine.engine_number, car.gas_tank_volume, car.route, car.price,
+                            car.sum_fuel_price, car.number_of_refuelling, round(car.engine.engine_condition, 2)))
 
-# info generator and starter of route
-for car in Car.all_cars:
-    logger.info("Start status: Car: {}, engine: {}, tank volume: {}, route: {} km, price: {}, spending on fuel: {}, "
-                "number of fuelling: {}, engine condition: {}%."
-                .format(car.name, car.engine.engine_number, car.gas_tank_volume, car.route, car.price,
-                        car.sum_fuel_price, car.number_of_refuelling, round(car.engine.engine_condition, 2)))
+        car.run()
 
-    car.run()
+        logger.info(
+            "Start status: Car: {}, engine: {}, tank volume: {}, route: {} km, price: {}, spending on fuel: {}, "
+            "number of fuelling: {}, engine condition: {}%."
+            .format(car.name, car.engine.engine_number, car.gas_tank_volume, car.route, car.price, car.sum_fuel_price,
+                    car.number_of_refuelling, round(car.engine.engine_condition, 2)))
 
-    logger.info(
-        "Start status: Car: {}, engine: {}, tank volume: {}, route: {} km, price: {}, spending on fuel: {}, "
-        "number of fuelling: {}, engine condition: {}%."
-        .format(car.name, car.engine.engine_number, car.gas_tank_volume, car.route, car.price, car.sum_fuel_price,
-                car.number_of_refuelling, round(car.engine.engine_condition, 2)))
+    # Output final info
+    informer = Info()
 
-# Output final info
-informer = Info()
+    logger.info("Sum of credits: {}".format(informer.credits_sum()))
+    logger.info("Reclaimed engines: {}".format(Engine.reclaimed_engines))
 
-logger.info("Sum of credits: {}".format(informer.credits_sum()))
-logger.info("Reclaimed engines: {}".format(Engine.reclaimed_engines))
+    for engine in Engine.reclaimed_engines:
+        logger.info("Reclaimed engine number: {}".format(engine.engine_number))
 
-for engine in Engine.reclaimed_engines:
-    logger.info("Reclaimed engine number: {}".format(engine.engine_number))
+    lists = informer.sorter(Car.all_cars)
 
-lists = informer.sorter(Car.all_cars)
-
-logger.info("List of diesel cars: {}".format(lists[0]))
-logger.info("List of gasiline cars: {}".format(lists[1]))
-logger.info("Price of all cars: {}".format(informer.full_price(Car.all_cars)))
+    logger.info("List of diesel cars: {}".format(lists[0]))
+    logger.info("List of gasiline cars: {}".format(lists[1]))
+    logger.info("Price of all cars: {}".format(informer.full_price(Car.all_cars)))
