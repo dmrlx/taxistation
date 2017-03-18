@@ -127,6 +127,11 @@ class Car(object):
         self.current_fuel_level = self.gas_tank_volume
         self.refuelling_counter += 1
 
+    # Static method for define number of objects
+    @staticmethod
+    def number_of_cars():
+        return len(Car.all_cars)
+
     # Current route
     @property
     def current_route(self):

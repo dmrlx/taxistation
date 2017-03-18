@@ -1,24 +1,31 @@
 import time
 import random
 
+
 def my_decorator(deco_arg):
     def wrapper(func):
-        def arg_receiver(arg, next_arg):
+        def arg_receiver(arg):
             start = time.time()
-            func(arg, next_arg)
+            if isinstance(arg, int):
+                func(arg)
+
+            if isinstance(arg, str):
+                summ = 0
+                for char in arg:
+                    summ += ord(char)
+                func(summ)
             end = time.time()
             f = open(deco_arg, "a")
-            f.write("I receive args: {} and {}. Process length: {} sec.\n".format(arg, next_arg, int(end-start)))
+            f.write("Arg is \"{}\". Process length: {} sec.\n".format(arg, int(end-start)))
             f.close()
         return arg_receiver
     return wrapper
 
-    pass
 
 @my_decorator("save.dat")
-def printer(arg1, arg2):
+def printer(arg1):
     time.sleep(random.randint(1, 5))
-    print("{} + {} = {}".format(arg1, arg2, arg1+arg2))
+    print(arg1 ** 2)
 
-printer(2, 3)
-
+printer(3)
+printer("and")
